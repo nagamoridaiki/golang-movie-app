@@ -8,6 +8,10 @@
 </head>
 <body class="container">
     <h1 class="display-4 mb-4">{{.Title}}</h1>
+    {{ if .Flg }}
     <p>{{.Message}}</p>
+    {{ else }}
+    <p>{{.JMessage}}</p>
+    {{ end }}
 </body>
 </html>
