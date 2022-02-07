@@ -8,10 +8,10 @@
 </head>
 <body class="container">
     <h1 class="display-4 mb-4">{{.Title}}</h1>
-    {{ with .Message }}
-    <p>OK, message is here!</p>
-    {{ else }}
-    <p>no message...</p>
+    <ul class="list-group">
+    {{ range $index, $element := .Items }}
+    <li class="list-group-item">{{$index}}: {{$element}}</li>
     {{ end }}
+    </ul>
 </body>
 </html>

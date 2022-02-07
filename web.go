@@ -56,11 +56,12 @@ func hello(w http.ResponseWriter, rq *http.Request,
 	tmp *template.Template) {
 
 	item := struct {
-		Title   string
-		Message string
+		Title    string
+		Items    []string
+		JMessage string
 	}{
-		Title:   "Send values",
-		Message: "YES! this is message!!", //☆
+		Title: "Send values",
+		Items: []string{"One", "Two", "Three"},
 	}
 
 	er := tmp.Execute(w, item)
