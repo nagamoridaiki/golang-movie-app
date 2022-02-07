@@ -60,7 +60,7 @@ func hello(w http.ResponseWriter, rq *http.Request,
 		Message string
 	}{
 		Title:   "Send values",
-		Message: "This is Sample message.<br>これはサンプルです。",
+		Message: "YES! this is message!!", //☆
 	}
 
 	er := tmp.Execute(w, item)
