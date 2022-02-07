@@ -54,10 +54,13 @@ func index(w http.ResponseWriter, rq *http.Request, tmp *template.Template) {
 // hello handler.
 func hello(w http.ResponseWriter, rq *http.Request,
 	tmp *template.Template) {
+	msg := "type name and password:"
 
-	id := rq.FormValue("id")
-	nm := rq.FormValue("name")
-	msg := "id: " + id + ", Name: " + nm
+	if rq.Method == "POST" {
+		nm := rq.PostFormValue("name")
+		pw := rq.PostFormValue("pass")
+		msg = "name: " + nm + ", passowrd: " + pw
+	}
 
 	item := struct {
 		Title   string
