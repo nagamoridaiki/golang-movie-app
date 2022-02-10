@@ -4,14 +4,12 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+
+	"github.com/gorilla/sessions"
 )
 
-// Temps is template structure.
-type Temps struct {
-	notemp *template.Template
-	indx   *template.Template
-	helo   *template.Template
-}
+// session variable. (not used)
+var cs *sessions.CookieStore = sessions.NewCookieStore([]byte("secret-key-1234"))
 
 // Template for no-template.
 func notemp() *template.Template {
@@ -20,73 +18,59 @@ func notemp() *template.Template {
 	return tmp
 }
 
-// setup template function.
-func setupTemp() *Temps {
-	temps := new(Temps)
-
-	temps.notemp = notemp()
-
-	// set index template.
-	indx, er := template.ParseFiles("templates/index.html")
-	if er != nil {
-		indx = temps.notemp
-	}
-	temps.indx = indx
-
-	// set hello template.
-	helo, er := template.ParseFiles("templates/hello.html")
-	if er != nil {
-		helo = temps.notemp
-	}
-	temps.helo = helo
-
-	return temps
+// get target Temlate.
+func page(fname string) *template.Template {
+	tmps, _ := template.ParseFiles("templates/"+fname+".html",
+		"templates/head.html", "templates/foot.html")
+	return tmps
 }
 
 // index handler.
-func index(w http.ResponseWriter, rq *http.Request, tmp *template.Template) {
-	er := tmp.Execute(w, nil)
+func index(w http.ResponseWriter, rq *http.Request) {
+	item := struct {
+		Template string
+		Title    string
+		Message  string
+	}{
+		Template: "index",
+		Title:    "Index",
+		Message:  "This is Top page.",
+	}
+	er := page("index").Execute(w, item)
 	if er != nil {
 		log.Fatal(er)
 	}
 }
 
 // hello handler.
-var flg bool = true
-
-// hello handler.
-func hello(w http.ResponseWriter, rq *http.Request,
-	tmp *template.Template) {
-
-	item := struct {
-		Flg      bool
-		Title    string
-		Message  string
-		JMessage string
-	}{
-		Flg:      flg,
-		Title:    "Send values",
-		Message:  "This is Sample message.",
-		JMessage: "これはサンプルです。",
+func hello(w http.ResponseWriter, rq *http.Request) {
+	data := []string{
+		"One", "Two", "Three",
 	}
 
-	er := tmp.Execute(w, item)
+	item := struct {
+		Title string
+		Data  []string
+	}{
+		Title: "Hello",
+		Data:  data,
+	}
+
+	er := page("hello").Execute(w, item)
 	if er != nil {
 		log.Fatal(er)
 	}
-	flg = !flg
 }
 
 // main program.
 func main() {
-	temps := setupTemp()
 	// index handling.
 	http.HandleFunc("/", func(w http.ResponseWriter, rq *http.Request) {
-		index(w, rq, temps.indx)
+		index(w, rq)
 	})
 	// hello handling
 	http.HandleFunc("/hello", func(w http.ResponseWriter, rq *http.Request) {
-		hello(w, rq, temps.helo)
+		hello(w, rq)
 	})
 
 	http.ListenAndServe("", nil)
