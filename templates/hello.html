@@ -1,27 +1,7 @@
-<html>
-<head>
-    <meta charset='utf-8'>
-    <title>Hello</title>
-    <link rel="stylesheet" 
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
-    crossorigin="anonymous">
-</head>
-<body class="container">
-    <h1 class="display-4 mb-4">{{.Title}}</h1>
-    <p>{{ .Message }}</p>
-    <form action="/hello" method="post">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" 
-                id="name" name="name">
-          </div>
-          <div class="form-group">
-            <label for="pass">Password</label>
-            <input type="password" class="form-control" 
-                id="pass" name="pass">
-          </div>
-          <button type="submit" class="btn btn-primary">
-              Click</button>
-    </form>
-</body>
-</html>
+{{ template "header" .}}
+<ul class="list-group">
+    {{ range $n,$itm := .Data}}
+    <li class="list-group-item">{{ $itm }}</li>
+    {{ end }}
+</ul>
+{{ template "footer" .}}

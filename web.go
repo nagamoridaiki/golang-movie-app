@@ -8,12 +8,8 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-// Temps is template structure.
-type Temps struct {
-	notemp *template.Template
-	indx   *template.Template
-	helo   *template.Template
-}
+// session variable. (not used)
+var cs *sessions.CookieStore = sessions.NewCookieStore([]byte("secret-key-1234"))
 
 // Template for no-template.
 func notemp() *template.Template {
@@ -22,73 +18,45 @@ func notemp() *template.Template {
 	return tmp
 }
 
-// setup template function.
-func setupTemp() *Temps {
-	temps := new(Temps)
-
-	temps.notemp = notemp()
-
-	// set index template.
-	indx, er := template.ParseFiles("templates/index.html")
-	if er != nil {
-		indx = temps.notemp
-	}
-	temps.indx = indx
-
-	// set hello template.
-	helo, er := template.ParseFiles("templates/hello.html")
-	if er != nil {
-		helo = temps.notemp
-	}
-	temps.helo = helo
-
-	return temps
+// get target Temlate.
+func page(fname string) *template.Template {
+	tmps, _ := template.ParseFiles("templates/"+fname+".html",
+		"templates/head.html", "templates/foot.html")
+	return tmps
 }
 
 // index handler.
-func index(w http.ResponseWriter, rq *http.Request, tmp *template.Template) {
-	er := tmp.Execute(w, nil)
+func index(w http.ResponseWriter, rq *http.Request) {
+	item := struct {
+		Template string
+		Title    string
+		Message  string
+	}{
+		Template: "index",
+		Title:    "Index",
+		Message:  "This is Top page.",
+	}
+	er := page("index").Execute(w, item)
 	if er != nil {
 		log.Fatal(er)
 	}
 }
 
-var cs *sessions.CookieStore = sessions.NewCookieStore([]byte("secret-key-12345"))
-
 // hello handler.
-func hello(w http.ResponseWriter, rq *http.Request,
-	tmp *template.Template) {
-	msg := "login name & password:"
-
-	ses, _ := cs.Get(rq, "hello-session")
-
-	if rq.Method == "POST" {
-		ses.Values["login"] = nil
-		ses.Values["name"] = nil
-		nm := rq.PostFormValue("name")
-		pw := rq.PostFormValue("pass")
-		if nm == pw {
-			ses.Values["login"] = true
-			ses.Values["name"] = nm
-		}
-		ses.Save(rq, w)
-	}
-
-	flg, _ := ses.Values["login"].(bool)
-	lname, _ := ses.Values["name"].(string)
-	if flg {
-		msg = "logined: " + lname
+func hello(w http.ResponseWriter, rq *http.Request) {
+	data := []string{
+		"One", "Two", "Three",
 	}
 
 	item := struct {
-		Title   string
-		Message string
+		Title string
+		Data  []string
 	}{
-		Title:   "Session",
-		Message: msg,
+		Title: "Hello",
+		Data:  data,
 	}
 
-	er := tmp.Execute(w, item)
+	er := page("hello").Execute(w, item)
 	if er != nil {
 		log.Fatal(er)
 	}
@@ -96,14 +64,13 @@ func hello(w http.ResponseWriter, rq *http.Request,
 
 // main program.
 func main() {
-	temps := setupTemp()
 	// index handling.
 	http.HandleFunc("/", func(w http.ResponseWriter, rq *http.Request) {
-		index(w, rq, temps.indx)
+		index(w, rq)
 	})
 	// hello handling
 	http.HandleFunc("/hello", func(w http.ResponseWriter, rq *http.Request) {
-		hello(w, rq, temps.helo)
+		hello(w, rq)
 	})
 
 	http.ListenAndServe("", nil)
